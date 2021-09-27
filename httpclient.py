@@ -33,7 +33,17 @@ class HTTPResponse(object):
         self.body = body
 
 class HTTPClient(object):
-    #def get_host_port(self,url):
+    # https://docs.python.org/3.6/library/urllib.parse.html#url-parsing
+    def get_host_port(self,url):
+        host = url.hostname
+        port = url.port
+        scheme = url.scheme
+        if scheme == "http" and port == None:
+            return host, 80
+        elif scheme == "https" and port == None:
+            return host, 443
+        else: # hostname and port are present in the request
+            return host, port
 
     def connect(self, host, port):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -64,12 +74,17 @@ class HTTPClient(object):
             if (part):
                 buffer.extend(part)
             else:
-                done = not part
+                done = not part # what the heck is this
         return buffer.decode('utf-8')
 
     def GET(self, url, args=None):
         code = 500
         body = ""
+        print("we're supposed to GET stuff here.")
+        parsed_url = urllib.parse(url)
+
+        # client_host = parsed_url.hostname
+        client_host, client_port = self.get_host_port(parsed_url)
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
